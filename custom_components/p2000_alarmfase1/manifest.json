@@ -1,0 +1,17 @@
+{
+  "domain": "p2000_alarmfase1",
+  "name": "P2000 (alarmfase1.nl)",
+  "config_flow": true,
+  "documentation": "https://github.com/malosaaa/ha-rdw",
+  "issue_tracker": "https://github.com/malosaaa/ha-rdw/issues",
+  "codeowners": ["@malosaaa"],
+  "requirements": [
+    "beautifulsoup4==4.12.3",
+    "lxml==5.3.2"
+  ],
+  "iot_class": "web_scraping",
+  "version": "1.0.0",
+  "dependencies": [],
+  "after_dependencies": [],
+  "integration_type": "service"
+}

@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add P2000 Region (alarmfase1.nl)",
+        "description": "Enter a friendly name and the region path from alarmfase1.nl (e.g., `limburg-zuid/kerkrade` for Kerkrade).",
+        "data": {
+          "instance_name": "Friendly Name (e.g., P2000 Kerkrade)",
+          "region_path": "Region Path (e.g., province/town)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to alarmfase1.nl. Check internet connection.",
+      "invalid_region_path": "Invalid Region Path (received 404 or no data found). Please check the path on alarmfase1.nl.",
+      "parse_error": "Failed to parse data from alarmfase1.nl. The website structure may have changed.",
+      "unknown_api_error": "An unknown error occurred while fetching data.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This region path is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure Sensors for {instance_name}",
+        "description": "Select which data fields from the latest P2000 message you want to make available as attributes.",
+        "data": {
+          "priority_code": "Priority Code (State)",
+          "message": "Message Text",
+          "time": "Timestamp (Parsed)",
+          "city": "City",
+          "address": "Address/Street",
+          "postalcode": "Postal Code",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "service_type": "Service Type (Inferred)",
+          "raw_time_str": "Raw Time String (e.g., 'x minutes ago')",
+          "absolute_time_str": "Absolute Time String (Raw)"
+        }
+      },
+      "filters": {
+         "title": "Configure Service Filters for {instance_name}",
+         "description": "Select which types of emergency services you want to see messages for. If a message's type is unchecked, the sensor will retain the data from the *previous* message of an allowed type.",
+         "data": {
+            "filter_ambulance": "Show Ambulance Messages",
+            "filter_fire": "Show Fire Department Messages",
+            "filter_police": "Show Police Messages",
+            "filter_other": "Show Other Messages (KNRM, Heli, etc.)"
+         }
+      }
+    }
+  }
+}
