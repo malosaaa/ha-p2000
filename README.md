@@ -4,13 +4,22 @@
 This custom integration for Home Assistant allows you to scrape emergency messages from [alarmfase1.nl](https://www.alarmfase1.nl/) for a specific region and display them as sensors. It supports filtering by service type and provides geographical coordinates for map integration.
 
 ## Features
+* ✅ **L1-Style Persistence**: Includes a built-in cache system.
+* ✅ **Blaxing fast startup and entity control**: Assistant reboots—no more "Unknown" states on startup.
+* ✅ **Latest live data**: Fetches the latest P2000 emergency messages from alarmfase1.nl.
+* ✅ **Multiple regions**: Configure multiple regions by adding the integration multiple times.
+* ✅ **Filter**: Filter messages by service type (Ambulance, Fire Department, Police, Other) via the Options flow.
+* ✅ **Coordinates**: Includes coordinates (latitude and longitude) for displaying incidents on a map.
+* ✅ **Diagnostics**: Provides diagnostic sensors for monitoring the integration's status.
+* ✅ **Service Calls**: Includes services to manually trigger a refresh or clear the local cache via Developer Tools.
 
-* Fetches the latest P2000 emergency messages from alarmfase1.nl.
-* Configure multiple regions by adding the integration multiple times.
-* Filter messages by service type (Ambulance, Fire Department, Police, Other) via the Options flow.
-* Includes coordinates (latitude and longitude) for displaying incidents on a map.
-* Provides diagnostic sensors for monitoring the integration's status.
-* Uses Home Assistant's UI for configuration (Config Flow).
+## 🛠 Services
+
+| Service | Description |
+| :--- | :--- |
+| `p2000.manual_refresh` | Forces an immediate scrape of the website. |
+| `p2000.clear_cache` | Deletes the local `.storage` cache file. |
+| `p2000.clear_debugfile` | Deletes the local `debugfile`. |
 
 ## Prerequisites
 
@@ -66,7 +75,8 @@ This integration creates the following entities for each configured region (inst
 
 * **`sensor.p2000_alarmfase1_<instance_name>_latest_message`**: This sensor provides the priority code of the latest matching emergency message. Its attributes contain detailed information:
     * `priority_code`
-    * `datetime` (of the message)
+    * `date` (of the message)
+    * `time` (of the message)
     * `region`
     * `location`
     * `street`
@@ -79,9 +89,8 @@ This integration creates the following entities for each configured region (inst
     * ... (other scraped data based on your options)
 
 * **Diagnostic Sensors:**
-    * `sensor.p2000_alarmfase1_<instance_name>_last_update_status`: Shows "OK" or "Error" for the last update.
-    * `sensor.p2000_alarmfase1_<instance_name>_coordinator_last_update`: Timestamp of the last successful data fetch.
-    * `sensor.p2000_alarmfase1_<instance_name>_consecutive_update_errors`: Number of consecutive update errors.
+    * `sensor.p2000_alarmfase1_<instance_name>_last_update`: Shows "OK" or "Error" for the last update.
+    * `sensor.p2000_alarmfase1_<instance_name>_status`: Timestamp of the last successful data fetch
 
 *(Replace `<instance_name>` with the name you provided during configuration, e.g., `maastricht`)*
 
