@@ -1,7 +1,12 @@
 # P2000 Alarmfase1 Integration for Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)][hacs]
+[![Project Maintenance][maintenance_badge]](https://github.com/Malosaaa/ha-p2000)
+
+
 This custom integration for Home Assistant allows you to scrape emergency messages from [alarmfase1.nl](https://www.alarmfase1.nl/) for a specific region and display them as sensors. It supports filtering by service type and provides geographical coordinates for map integration.
+<br>
+
 
 ## Features
 * ✅ **L1-Style Persistence**: Includes a built-in cache system.
@@ -12,6 +17,7 @@ This custom integration for Home Assistant allows you to scrape emergency messag
 * ✅ **Coordinates**: Includes coordinates (latitude and longitude) for displaying incidents on a map.
 * ✅ **Diagnostics**: Provides diagnostic sensors for monitoring the integration's status.
 * ✅ **Service Calls**: Includes services to manually trigger a refresh or clear the local cache via Developer Tools.
+* ✅ **Cool animated card**: Very cool animated dashboard card that matches the emergency.
 
 ## 🛠 Services
 
@@ -98,6 +104,155 @@ This integration creates the following entities for each configured region (inst
 
 The main sensor provides `latitude` and `longitude` attributes, allowing you to display emergency incidents on a Home Assistant map card. The icon of the map marker will dynamically change based on the `service_type` of the message (e.g., ambulance icon, fire truck icon, police car icon).
 
+## 🎨 Recommended Dashboard (Mushroom)
+
+To get the look seen in the screenshots, you will need **[Mushroom Cards](https://github.com/piitaya/lovelace-mushroom)** and **[Card Mod](https://github.com/thomasloven/lovelace-card-mod)** (both available in HACS). 
+
+*Note: Replace `yourplace` in the entity IDs below with your actual instance name.*
+
+```yaml
+type: custom:mushroom-legacy-template-card
+entity: sensor.p2000_alarmfase1_yourplace_latest_message
+fill_container: true
+multiline_secondary: true
+primary: "{{ states('sensor.p2000_alarmfase1_yourplace_latest_message') }}"
+secondary: |
+  📅 {{ state_attr(entity, 'date') }} | 🕒 {{ state_attr(entity, 'time') }}
+  📍 {{ state_attr(entity, 'address') }}, {{ state_attr(entity, 'postalcode') }}
+  💬 {{ state_attr(entity, 'message') }}
+icon: >-
+  {%- if 'Ambulance' in state_attr(entity, 'service_type') -%} mdi:ambulance {%-
+  elif 'Politie' in state_attr(entity, 'service_type') -%} mdi:police-badge {%-
+  elif 'Brandweer' in state_attr(entity, 'service_type') -%} mdi:fire-truck {%-
+  elif 'Trauma' in state_attr(entity, 'service_type') -%} mdi:helicopter {%-
+  else -%} mdi:alert-decagram {%- endif -%}
+icon_color: >-
+  {%- if 'Ambulance' in state_attr(entity, 'service_type') -%} yellow {%- elif
+  'Politie' in state_attr(entity, 'service_type') -%} blue {%- elif 'Brandweer'
+  in state_attr(entity, 'service_type') -%} red {%- elif 'Trauma' in
+  state_attr(entity, 'service_type') -%} orange {%- else -%} grey {%- endif -%}
+tap_action:
+  action: url
+  url_path: >-
+    {% set lat = state_attr(entity, 'latitude') %} {% set lon =
+    state_attr(entity, 'longitude') %} {% if lat and lon %}
+    https://www.google.com/maps/search/?api=1&query={{ lat }},{{ lon }} {% else
+    %} # {% endif %}
+card_mod:
+  style:
+    mushroom-shape-icon$: |
+      .shape {
+        position: relative;
+        overflow: visible !important;
+        
+        /* 1. Define the dynamic color for the spray and fog */
+        {% if 'Ambulance' in state_attr(config.entity, 'service_type') %} --irrig-color: var(--rgb-yellow);
+        {% elif 'Politie' in state_attr(config.entity, 'service_type') %} --irrig-color: var(--rgb-blue);
+        {% elif 'Brandweer' in state_attr(config.entity, 'service_type') %} --irrig-color: var(--rgb-red);
+        {% else %} --irrig-color: var(--rgb-grey);
+        {% endif %}
+
+        /* 2. Trigger the animations if alert is active */
+        {% if '1' in states(config.entity) or 'Politie' in states(config.entity) %}
+          --shape-animation: irrig-ultra 2s ease-in-out infinite;
+          --irrig-heads-animation: irrig-heads 1.6s ease-out infinite;
+          --irrig-fog-animation: irrig-fog 2s ease-in-out infinite;
+          opacity: 1;
+        {% else %}
+          --shape-animation: none;
+          --irrig-heads-animation: none;
+          --irrig-fog-animation: none;
+          opacity: 0.75;
+        {% endif %}
+
+        /* 3. Apply the jumping animation to the shape itself */
+        animation: var(--shape-animation);
+      }
+
+      .shape::before,
+      .shape::after {
+        content: '';
+        position: absolute;
+        border-radius: inherit;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .shape::before {
+        animation: var(--irrig-heads-animation);
+      }
+
+      .shape::after {
+        animation: var(--irrig-fog-animation);
+      }
+
+      @keyframes irrig-ultra {
+        0%   { transform: translateY(0) scale(1); }
+        25%  { transform: translateY(-2px) scale(1.02); }
+        50%  { transform: translateY(-4px) scale(1.03); }
+        75%  { transform: translateY(-2px) scale(1.02); }
+        100% { transform: translateY(0) scale(1); }
+      }
+
+      @keyframes irrig-heads {
+        0% {
+          box-shadow:
+            -10px 10px 0 0 rgba(var(--irrig-color), 0),
+            0 10px 0 0 rgba(var(--irrig-color), 0),
+            10px 10px 0 0 rgba(var(--irrig-color), 0);
+        }
+        20% {
+          box-shadow:
+            -10px 4px 0 0 rgba(var(--irrig-color), 0.9),
+            0 10px 0 0 rgba(var(--irrig-color), 0),
+            10px 10px 0 0 rgba(var(--irrig-color), 0);
+        }
+        40% {
+          box-shadow:
+            -10px -2px 0 0 rgba(var(--irrig-color), 0.4),
+            0 4px 0 0 rgba(var(--irrig-color), 0.9),
+            10px 10px 0 0 rgba(var(--irrig-color), 0);
+        }
+        100% {
+          box-shadow:
+            -10px 10px 0 0 rgba(var(--irrig-color), 0),
+            0 10px 0 0 rgba(var(--irrig-color), 0),
+            10px 10px 0 0 rgba(var(--irrig-color), 0);
+        }
+      }
+
+      @keyframes irrig-fog {
+        50% {
+          filter: blur(0.7px);
+          box-shadow: 0 -14px 18px -8px rgba(var(--irrig-color), 0.45);
+        }
+      }
+    .: |
+      mushroom-shape-icon {
+          --icon-size: 65px;
+          display: flex;
+          margin: -55px 0 10px -20px !important;
+          padding-right: 10px;
+        }
+      ha-card {
+        clip-path: inset(0 0 0 0 round var(--ha-card-border-radius, 12px));
+        {% if '1' in states(config.entity) or 'Politie' in states(config.entity) %}
+          {% set s = state_attr(config.entity, 'service_type') %}
+          {% if 'Ambulance' in s %} background: rgba(var(--rgb-yellow), 0.1) !important;
+          {% elif 'Politie' in s %} background: rgba(var(--rgb-blue), 0.1) !important;
+          {% elif 'Brandweer' in s %} background: rgba(var(--rgb-red), 0.1) !important;
+          {% else %} background: rgba(var(--rgb-red), 0.1) !important;
+          {% endif %}
+        {% endif %}
+      }
+grid_options:
+  columns: 48
+  rows: 2
+
+```
+
+[hacs]: https://hacs.xyz
+[hacs_badge]: https://img.shields.io/badge/HACS-Custom
 ## Options
 
 The following options can be configured for each instance of the integration:
@@ -136,3 +291,6 @@ This project is licensed under the [Apache License 2.0](LICENSE).
 ---
 
 ---
+[hacs]: https://hacs.xyz
+[hacs_badge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge
+[maintenance_badge]: https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge
