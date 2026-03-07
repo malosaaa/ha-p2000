@@ -32,8 +32,10 @@ DEFAULT_UPDATE_INTERVAL: Final = timedelta(seconds=90) # Check every 90 seconds?
 # These should match the keys returned by the api.py parser
 SCRAPED_DATA_KEYS: Final[list[str]] = [
     "priority_code", # Like P 1, A 2 etc. (Primary sensor state)
+    "title",
     "message",
     "time", # Parsed datetime object
+    "date",
     "city",
     "address",
     "postalcode",
@@ -47,10 +49,13 @@ SCRAPED_DATA_KEYS: Final[list[str]] = [
 # Default sensor selection (which ones are enabled by default)
 DEFAULT_ENABLED_SENSORS: Final[list[str]] = [
     "priority_code",
+    "title",	
     "message",
     "time",
+    "date",
     "city",
     "address",
+    "postalcode",
     "service_type",
     "latitude",
     "longitude",
